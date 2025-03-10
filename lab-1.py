@@ -2,6 +2,8 @@ import socket  # Import socket module for potential network communication
 import struct  # Import struct module for packing/unpacking binary data
 import pickle  # Import pickle module for serializing/deserializing Python objects
 import json  # Import json module for encoding/decoding JSON data
+import re, uuid
+
 
 # Physical Layer: Responsible for transmitting and receiving raw binary data
 class PhysicalLayer:
@@ -18,7 +20,8 @@ class PhysicalLayer:
 # Data Link Layer: Adds MAC address and frames the data before sending
 class DataLinkLayer:
     def send(self, data):
-        mac_address = "AA:BB:CC:DD:EE:FF"  # Simulated MAC address
+        mac_address = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+        # print("KANI" + mac_address)
         framed_data = json.dumps({"MAC": mac_address, "Payload": data.hex()}).encode('utf-8')  # Convert data to JSON format
         print(f"Data Link Layer: Framing data: {framed_data}")
         return PhysicalLayer().send(framed_data)  # Pass framed data to Physical Layer
@@ -31,7 +34,7 @@ class DataLinkLayer:
 # Network Layer: Adds an IP address and routes the data
 class NetworkLayer:
     def send(self, data):
-        ip_address = "192.168.1.1"  # Simulated IP address
+        ip_address = socket.gethostbyname(socket.gethostname())  # accessed IP address
         packet = json.dumps({"IP": ip_address, "Payload": data.hex()}).encode('utf-8')  # Create a packet with IP address
         print(f"Network Layer: Routing data: {packet}")
         return DataLinkLayer().send(packet)  # Pass packet to Data Link Layer
