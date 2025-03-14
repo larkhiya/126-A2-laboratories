@@ -2,8 +2,16 @@ import socket  # Import socket module for potential network communication
 import struct  # Import struct module for packing/unpacking binary data
 import pickle  # Import pickle module for serializing/deserializing Python objects
 import json  # Import json module for encoding/decoding JSON data
-import re, uuid
+import subprocess
+import re
 
+def get_mac_address():
+    try:
+        result = subprocess.check_output("getmac", shell=True).decode()
+        mac = re.findall(r"([0-9A-Fa-f:-]{17})", result)
+        return mac[0] if mac else "MAC Address Not Found"
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 # Physical Layer: Responsible for transmitting and receiving raw binary data
 class PhysicalLayer:
@@ -20,7 +28,7 @@ class PhysicalLayer:
 # Data Link Layer: Adds MAC address and frames the data before sending
 class DataLinkLayer:
     def send(self, data):
-        mac_address = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+        mac_address = get_mac_address()
         # print("KANI" + mac_address)
         framed_data = json.dumps({"MAC": mac_address, "Payload": data.hex()}).encode('utf-8')  # Convert data to JSON format
         print(f"Data Link Layer: Framing data: {framed_data}")
