@@ -34,7 +34,7 @@ class DataLinkLayer:
 # Network Layer: Adds an IP address and routes the data
 class NetworkLayer:
     def send(self, data):
-        ip_address = socket.gethostbyname(socket.gethostname())  # accessed IP address
+        ip_address = self.get_local_ip() # accessed IP address
         packet = json.dumps({"IP": ip_address, "Payload": data.hex()}).encode('utf-8')  # Create a packet with IP address
         print(f"Network Layer: Routing data: {packet}")
         return DataLinkLayer().send(packet)  # Pass packet to Data Link Layer
@@ -43,6 +43,17 @@ class NetworkLayer:
         decoded_data = json.loads(DataLinkLayer().receive(data).decode('utf-8'))  # Decode received packet
         print(f"Network Layer: Received packet: {decoded_data}")
         return bytes.fromhex(decoded_data["Payload"])  # Extract payload and convert to bytes
+    
+    def get_local_ip(self):
+        """Retrieve the local network IP address."""
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            # Connect to an external server (Google DNS) but don't actually send data
+            s.connect(("8.8.8.8", 80))
+            ip_address = s.getsockname()[0]
+        finally:
+            s.close()
+        return ip_address
 
 # Transport Layer: Ensures data integrity and maintains sequence
 class TransportLayer:
