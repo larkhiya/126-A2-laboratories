@@ -2,16 +2,13 @@ import socket  # Import socket module for potential network communication
 import struct  # Import struct module for packing/unpacking binary data
 import pickle  # Import pickle module for serializing/deserializing Python objects
 import json  # Import json module for encoding/decoding JSON data
-import subprocess
-import re
+import uuid
 
 def get_mac_address():
-    try:
-        result = subprocess.check_output("getmac", shell=True).decode()
-        mac = re.findall(r"([0-9A-Fa-f:-]{17})", result)
-        return mac[0] if mac else "MAC Address Not Found"
-    except Exception as e:
-        return f"Error: {str(e)}"
+    mac = uuid.getnode()
+    mac_bytes = mac.to_bytes(6, byteorder='big') 
+    return ':'.join(f'{b:02x}' for b in mac_bytes)
+
 
 # Physical Layer: Responsible for transmitting and receiving raw binary data
 class PhysicalLayer:
